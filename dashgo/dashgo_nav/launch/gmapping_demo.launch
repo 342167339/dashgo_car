@@ -1,0 +1,39 @@
+<launch>
+  <include file="$(find dashgo_driver)/launch/demo.launch"/>
+  <!--include file="$(find flashgo)/launch/flash_lidar.launch"/-->
+  
+    <arg name="scan_topic" default="/scan" />
+    <arg name="laser_frame" default="laser_frame" />
+    <!--arg name="laser_frame" default="base_laser_link" /-->
+    <arg name="laser_port" default="/dev/hokuyo" />
+
+  <node name="hokuyo" pkg="hokuyo_node" type="hokuyo_node">
+    <param name="port" type="string" value="$(arg laser_port)"/>
+    <param name="min_ang" value="-1.7" />
+    <param name="max_ang" value="1.7" />
+    <param name="min_range" value="0.18" />
+    <param name="hokuyo_node/calibrate_time" value="true" />
+    <param name="frame_id" value="$(arg laser_frame)" />
+    <remap from="scan" to="$(arg scan_topic)"/>
+  </node>
+
+  <include file="$(find dashgo_description)/launch/dashgo_description.launch"/>
+
+  <!--node pkg="tf" type="static_transform_publisher" name="base_link_to_laser4" 
+   args="0.18 0.0 0.2 -3.06 3.14  0.0 /base_footprint /laser_frame 40" /-->
+   <node pkg="tf" type="static_transform_publisher" name="base_link_to_laser4" 
+   args="0.18 0.0 0.2 0.0 0.0 0.0 /base_footprint /laser_frame 40" />
+   <!--static_transform_publisher 
+   x y z qx qy qz qw frame_id child_frame_id period_in_ms-->
+
+
+  <include file="$(find dashgo_nav)/launch/include/odom/gmapping.launch"/>
+  <include file="$(find dashgo_nav)/launch/include/odom/teb_move_base.launch"/>
+
+  <!--include file="$(find world_canvas_server)/launch/world_canvas_server.launch"/-->
+  <!--include file="$(find rosbridge_server)/launch/rosbridge_websocket.launch"/-->
+  
+  <node name="robot_pose_publisher" pkg="robot_pose_publisher" type="robot_pose_publisher" />
+
+  <include file="$(find turtlebot_rviz_launchers)/launch/view_navigation.launch"/>
+</launch>
